@@ -3,6 +3,7 @@ import { useLiveActivity } from '../contexts/LiveActivityContext';
 import { useSoundEffects } from '../hooks/useSoundEffects';
 import { useConnectedWalletAddress } from '../wallet/getConnectedWalletAddress';
 import { SentinelStatus } from '../contexts/LiveActivityContext';
+import { getEnv } from '../utils/env';
 
 interface SentinelConnectorProps {
   websocketUrl?: string;
@@ -11,7 +12,7 @@ interface SentinelConnectorProps {
 
 export const SentinelConnector: React.FC<SentinelConnectorProps> = ({
   websocketUrl = 'ws://localhost:7071',
-  enabled = process.env.VITE_ENABLE_LIVE_ACTIVITY === 'true' // Allow override via env var
+  enabled = getEnv('VITE_ENABLE_LIVE_ACTIVITY', 'false') === 'true' // Allow override via env var
 }) => {
   const { network, marketplace, mint, transfer, updateSentinelStatus } = useLiveActivity();
   const { playSound } = useSoundEffects();

@@ -62,7 +62,7 @@ declare global {
 
 export type WalletType = 'browser' | 'mydoge' | 'nintondo' | 'dojak';
 export type WalletMode = 'dojak' | 'local_browser_wallet';
-export type NetworkType = 'mainnet' | 'testnet';
+export type NetworkType = 'mainnet' | 'testnet' | 'regtest';
 export interface WalletData {
   address: string;
   privateKey: string;
@@ -111,6 +111,7 @@ export interface UnifiedWalletContextValue {
   connected: boolean;
   address: string | null;
   balance: number;
+  balanceVerified: boolean; // Track if balance has been verified from API
   connecting: boolean;
   connect: (type: WalletType) => Promise<void>;
   disconnect: () => Promise<void>;

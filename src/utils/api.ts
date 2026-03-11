@@ -1,5 +1,6 @@
 // API utilities for wallet-agnostic data providers (indexer / RPC gateway)
 import axios from 'axios';
+import { getEnv } from './env';
 
 // Inscriptions interfaces
 export interface MyDogeInscription {
@@ -24,7 +25,7 @@ export interface MyDogeInscriptionsResponse {
   total: number;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_WALLET_DATA_API_BASE_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+const API_BASE_URL = getEnv('VITE_WALLET_DATA_API_BASE_URL', 'http://localhost:3001/api').replace(/\/$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,

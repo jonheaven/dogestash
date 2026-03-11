@@ -1,4 +1,5 @@
 import { DogeLinkRPC } from 'doge-sdk';
+import { getEnv } from './env';
 
 // Transaction types
 export type TransactionType = 'utxo_merge' | 'utxo_split' | 'drc20_deploy' | 'drc20_mint' | 'drc20_transfer' | 'dogedrop_airdrop';
@@ -259,7 +260,7 @@ class TransactionTracker {
 }
 
 // Export singleton instance
-const RPC_URL = `http://dogecoin:${process.env.VITE_DOGECOIN_RPC_PASSWORD || 'password'}@${process.env.VITE_DOGECOIN_RPC_HOST || 'localhost'}:${process.env.VITE_DOGECOIN_RPC_PORT || '22555'}`;
+const RPC_URL = `http://dogecoin:${getEnv('VITE_DOGECOIN_RPC_PASSWORD', 'password')}@${getEnv('VITE_DOGECOIN_RPC_HOST', 'localhost')}:${getEnv('VITE_DOGECOIN_RPC_PORT', '22555')}`;
 
 export const transactionTracker = new TransactionTracker(RPC_URL);
 transactionTracker.initialize();

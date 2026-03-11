@@ -454,11 +454,8 @@ export function MyDogeWalletProvider({ children }: { children: React.ReactNode }
         if (myDoge.signPSBT) {
           console.log('🔧 [WALLET] Using signPSBT method for PSBT hex...');
           const signPsbtRes = await myDoge.signPSBT({
-            psbtHex: psbtHex, // Use psbtHex parameter for signPSBT
+            psbtHex: psbtHex,
             indexes: [0, 1], // Sign both inputs (buyer's payment inputs)
-            signOnly: true, // Only sign, don't broadcast
-            partial: true, // Keep as PSBT for backend combination
-            feeOnly: false // Not fee-only - include the full transaction
           });
 
           console.log('✅ [WALLET] PSBT signed successfully with signPSBT!');
@@ -480,7 +477,6 @@ export function MyDogeWalletProvider({ children }: { children: React.ReactNode }
           indexes: [0, 1], // Sign both inputs
           signOnly: true, // Only sign, don't broadcast
           partial: true, // Keep as PSBT for backend combination
-          feeOnly: false // Not fee-only - include the full transaction
         });
 
         console.log('✅ [WALLET] Raw transaction signed successfully with requestPsbt!');
@@ -531,20 +527,17 @@ export function MyDogeWalletProvider({ children }: { children: React.ReactNode }
         if (myDoge.signPSBT) {
           console.log('🔧 [WALLET] Using signPSBT method for PSBT hex (sign only)...');
           const signPsbtRes = await myDoge.signPSBT({
-            psbtHex: psbtHex, // Use psbtHex parameter for signPSBT
+            psbtHex: psbtHex,
             indexes: [0, 1], // Sign both inputs (buyer's payment inputs)
-            signOnly: true, // Only sign, don't broadcast
-            partial: true, // Keep as PSBT for backend combination
-            feeOnly: false // Not fee-only - include the full transaction
           });
 
           console.log('✅ [WALLET] PSBT signed successfully with signPSBT (sign only)!');
           console.log('📄 [WALLET] MyDoge response:', signPsbtRes);
 
-          if (signPsbtRes?.signedPsbt) {
-            return signPsbtRes.signedPsbt;
+          if (signPsbtRes?.signedRawTx) {
+            return signPsbtRes.signedRawTx;
           } else {
-            throw new Error('MyDoge signPSBT returned no signedPsbt');
+            throw new Error('MyDoge signPSBT returned no signedRawTx');
           }
         } else {
           throw new Error('MyDoge signPSBT method not available');
@@ -557,16 +550,15 @@ export function MyDogeWalletProvider({ children }: { children: React.ReactNode }
           indexes: [0, 1], // Sign both inputs
           signOnly: true, // Only sign, don't broadcast
           partial: true, // Keep as PSBT for backend combination
-          feeOnly: false // Not fee-only - include the full transaction
         });
 
         console.log('✅ [WALLET] Raw transaction signed successfully with requestPsbt (sign only)!');
         console.log('📄 [WALLET] MyDoge response:', signPsbtRes);
 
-        if (signPsbtRes?.signedPsbt) {
-          return signPsbtRes.signedPsbt;
+        if (signPsbtRes?.signedRawTx) {
+          return signPsbtRes.signedRawTx;
         } else {
-          throw new Error('MyDoge requestPsbt returned no signedPsbt');
+          throw new Error('MyDoge requestPsbt returned no signedRawTx');
         }
       }
     } catch (error) {
@@ -641,7 +633,10 @@ export function MyDogeWalletProvider({ children }: { children: React.ReactNode }
   };
 
   return (
-    <MyDogeWalletContext.Provider value={value}>{children}</MyDogeWalletContext.Provider>
+    <MyDogeWalletContext.Provider value={value}>
+      {/* @ts-ignore - Next.js type checking issue with React.ReactNode */}
+      {children}
+    </MyDogeWalletContext.Provider>
   );
 }
 

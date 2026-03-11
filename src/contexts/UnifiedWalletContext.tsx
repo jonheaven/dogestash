@@ -14,7 +14,7 @@ interface DojakState {
   connecting: boolean;
 }
 
-export interface UnifiedWalletContextValue {
+interface UnifiedWalletContextValue {
   walletType: WalletType | null;
   connected: boolean;
   address: string | null;
@@ -88,11 +88,13 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
       }
     };
 
-    window.dojak.on('accountsChanged', handleAccountsChanged);
+    if (window.dojak?.on) {
+      (window.dojak as any).on('accountsChanged', handleAccountsChanged);
+    }
 
     return () => {
-      if (window.dojak) {
-        window.dojak.removeListener('accountsChanged', handleAccountsChanged);
+      if (window.dojak?.removeListener) {
+        (window.dojak as any).removeListener('accountsChanged', handleAccountsChanged);
       }
       dojakListenersRef.current = false;
     };
@@ -142,7 +144,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
             // Check if the wallet type is actually available before trying to connect
             const isAvailable = stored === 'mydoge' ? (myDoge && (window.doge?.isMyDoge || (window as any).mydoge?.isMyDoge)) :
                                stored === 'nintondo' ? (nintondo && window.nintondo) :
-                               stored === 'dojak' ? (window.dojak?.isDojak) :
+                               stored === 'dojak' ? ((window.dojak as any)?.isDojak) :
                                stored === 'browser' ? !!browser : false;
 
             if (isAvailable) {
@@ -187,7 +189,11 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
         // Also disconnect other extension wallets
         if (walletType === 'dojak' && type !== 'dojak' && dojakState.connected) {
           console.log('🔄 [UNIFIED WALLET] Disconnecting Dojak before connecting other wallet...');
-          try { await window.dojak?.disconnect(); } catch {}
+          try { 
+            if (window.dojak) {
+              await (window.dojak as any).disconnect();
+            }
+          } catch {}
           setDojakState({ connected: false, address: null, balance: 0, connecting: false });
         }
       }
@@ -200,7 +206,11 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
         } else if (walletType === 'nintondo' && nintondo.connected) {
           await nintondo.disconnect();
         } else if (walletType === 'dojak' && dojakState.connected) {
-          try { await window.dojak?.disconnect(); } catch {}
+          try {
+            if (window.dojak) {
+              await (window.dojak as any).disconnect();
+            }
+          } catch {}
           setDojakState({ connected: false, address: null, balance: 0, connecting: false });
         }
       }
@@ -226,7 +236,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
         await nintondo.connect();
       } else if (type === 'dojak') {
         // Connect to Dojak wallet
-        if (!window.dojak?.isDojak) {
+        if (!(window.dojak as any)?.isDojak) {
           throw new Error('Dojak wallet not found');
         }
 
@@ -234,7 +244,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
 
         try {
           console.log('🔄 [DOJAK] Requesting accounts...');
-          const accounts = await window.dojak.requestAccounts();
+          const accounts = await (window.dojak as any).requestAccounts();
           console.log('✅ [DOJAK] Got accounts:', accounts);
 
           if (!accounts || accounts.length === 0) {
@@ -246,7 +256,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
           // Try to get balance
           let bal = 0;
           try {
-            const balanceResult = await window.dojak.getBalance();
+            const balanceResult = await (window.dojak as any).getBalance();
             bal = (balanceResult?.total || balanceResult?.confirmed || 0) / 100000000; // Convert satoshis to DOGE
           } catch (e) {
             console.warn('[DOJAK] Could not get balance:', e);
@@ -328,7 +338,11 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
       } else if (walletType === 'nintondo') {
         await nintondo.disconnect();
       } else if (walletType === 'dojak') {
-        try { await window.dojak?.disconnect(); } catch {}
+        try {
+          if (window.dojak) {
+            await (window.dojak as any).disconnect();
+          }
+        } catch {}
         setDojakState({ connected: false, address: null, balance: 0, connecting: false });
       } else if (walletType === 'browser') {
         await browser.disconnect();
@@ -360,7 +374,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
       } else if (walletType === 'dojak') {
         if (!window.dojak) throw new Error('Dojak wallet not available');
         const satoshis = Math.round(amount * 100000000);
-        return await window.dojak.sendBitcoin(recipientAddress, satoshis);
+        return await (window.dojak as any).sendBitcoin(recipientAddress, satoshis);
       } else {
         throw new Error('Transaction sending not supported for browser wallet');
       }
@@ -380,7 +394,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
         return await nintondo.signMessage(message);
       } else if (walletType === 'dojak') {
         if (!window.dojak) throw new Error('Dojak wallet not available');
-        return await window.dojak.signMessage(message, 'ecdsa');
+        return await (window.dojak as any).signMessage(message, 'ecdsa');
       } else {
         throw new Error('Message signing not supported for browser wallet');
       }
@@ -403,7 +417,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
         return await nintondo.signPSBT(psbtBase64);
       } else if (walletType === 'dojak') {
         if (!window.dojak) throw new Error('Dojak wallet not available');
-        return await window.dojak.signPsbt(psbtHex);
+        return await (window.dojak as any).signPsbt(psbtHex);
       } else {
         throw new Error('PSBT signing not supported for browser wallet');
       }
@@ -427,7 +441,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
       } else if (walletType === 'dojak') {
         if (!window.dojak) throw new Error('Dojak wallet not available');
         // Sign only, don't broadcast
-        return await window.dojak.signPsbt(psbtHex, { autoFinalized: false });
+        return await (window.dojak as any).signPsbt(psbtHex, { autoFinalized: false });
       } else {
         throw new Error('PSBT signing not supported for browser wallet');
       }
@@ -443,7 +457,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
         return await myDoge.sendInscription(recipientAddress, location);
       } else if (walletType === 'dojak') {
         if (!window.dojak) throw new Error('Dojak wallet not available');
-        return await window.dojak.sendInscription(recipientAddress, location);
+        return await (window.dojak as any).sendInscription(recipientAddress, location);
       } else {
         throw new Error('Inscription sending not supported for this wallet type');
       }
@@ -554,7 +568,10 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
   };
 
   return (
-    <UnifiedWalletContext.Provider value={value}>{children}</UnifiedWalletContext.Provider>
+    <UnifiedWalletContext.Provider value={value}>
+      {/* @ts-ignore - Next.js type checking issue with React.ReactNode */}
+      {children}
+    </UnifiedWalletContext.Provider>
   );
 }
 

@@ -3,6 +3,7 @@
 
 import { DogeLinkRPC } from 'doge-sdk';
 import { transactionTracker, TransactionType } from './transactionTracker';
+import { getEnv } from './env';
 
 export interface DiscoveredDogetag {
   id: string;
@@ -351,7 +352,7 @@ class DogetagSentinel {
 }
 
 // Create singleton instance using the same RPC config as transactionTracker
-const RPC_URL = `http://dogecoin:${process.env.VITE_DOGECOIN_RPC_PASSWORD || 'password'}@${process.env.VITE_DOGECOIN_RPC_HOST || 'localhost'}:${process.env.VITE_DOGECOIN_RPC_PORT || '22555'}`;
+const RPC_URL = `http://dogecoin:${getEnv('VITE_DOGECOIN_RPC_PASSWORD', 'password')}@${getEnv('VITE_DOGECOIN_RPC_HOST', 'localhost')}:${getEnv('VITE_DOGECOIN_RPC_PORT', '22555')}`;
 
 export const dogetagSentinel = new DogetagSentinel(RPC_URL);
 

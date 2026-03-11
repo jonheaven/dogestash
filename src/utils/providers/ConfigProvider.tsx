@@ -279,7 +279,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Periodic status checking (disabled in development by default)
   useEffect(() => {
     // Only enable periodic checking if explicitly requested
-    if (process.env.VITE_ENABLE_CONNECTION_MONITORING !== 'true') {
+    if (getEnv('VITE_ENABLE_CONNECTION_MONITORING', 'false') !== 'true') {
       return;
     }
 

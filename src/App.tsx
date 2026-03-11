@@ -268,7 +268,7 @@ const App: React.FC = () => {
           />
 
           {/* Live Network Activity Connector */}
-          <SentinelConnector enabled={process.env.VITE_ENABLE_LIVE_ACTIVITY === 'true'} />
+          <SentinelConnector enabled={getEnv('VITE_ENABLE_LIVE_ACTIVITY', 'false') === 'true'} />
 
           {/* Onboarding Tour */}
           <OnboardingTour
