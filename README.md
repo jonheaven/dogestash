@@ -1,47 +1,83 @@
-# dogestash
+# @jonheaven/dogestash
 
-Dogecoin local browser wallet implementation + browser extension support for DOGE dApps.
+Dogecoin local browser wallet implementation plus browser extension support for DOGE dApps.
 
 Provides a self-contained wallet toolkit for building on Dogecoin:
 - Local browser wallet core (`BrowserWallet`)
-- Wallet adapters and unified wallet flows for DOGE L1 wallets — MyDoge, Nintondo, Dojak
+- Wallet adapters and unified wallet flows for DOGE L1 wallets: MyDoge, Nintondo, Dojak
 - React contexts for wallet state (`src/contexts`)
-- Wallet connect/modal UI components (`src/components`)
+- Wallet connect and wallet management UI components (`src/components`)
 
 ## What is included
-- Dogecoin browser wallet generation/import/storage (mnemonic + WIF flow)
+- Dogecoin browser wallet generation, import, and storage
 - Password-based encryption for locally stored wallets
-- Unified wallet context patterns for browser + extension wallets
+- Unified wallet context patterns for browser and extension wallets
 - Connect modal and wallet management modal UI
 
-## Install deps
+## Install
 
 ```bash
-npm install
+npm install @jonheaven/dogestash
 ```
 
-## Quick start in a React dApp
+## Hello World React dApp
 
 ```tsx
+import React from 'react';
 import {
   DogestashProvider,
   ConnectWalletButton,
-} from 'dogestash';
+  useUnifiedWallet,
+} from '@jonheaven/dogestash';
 
-function App() {
+function HelloWorldApp() {
   return (
     <DogestashProvider>
-      <ConnectWalletButton />
+      <HelloWorld />
     </DogestashProvider>
   );
 }
+
+function HelloWorld() {
+  const { connected, address, balance, balanceVerified, signMessage } = useUnifiedWallet();
+
+  const handleSign = async () => {
+    try {
+      const signed = await signMessage('Hello, Dogecoin World!');
+      alert(`Signed message: ${signed}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Error: ${message}`);
+    }
+  };
+
+  return (
+    <div style={{ padding: 20, textAlign: 'center' }}>
+      <h1>Dogestash Hello World</h1>
+      <ConnectWalletButton />
+      {connected ? (
+        <>
+          <p>Connected Address: {address}</p>
+          <p>Balance: {balanceVerified ? `${balance} DOGE` : 'Loading...'}</p>
+          <button onClick={handleSign}>Sign "Hello, Dogecoin World!"</button>
+        </>
+      ) : (
+        <p>Connect a wallet to get started.</p>
+      )}
+    </div>
+  );
+}
+
+export default HelloWorldApp;
 ```
 
-For advanced custom flows, import `useUnifiedWallet` and your own UI while keeping `DogestashProvider` at the app root.
+This is the minimal supported flow today: connect a DOGE L1 wallet, read the connected address and verified balance from context, and sign a message with one hook call.
+
+For custom UIs, keep `DogestashProvider` at the app root and use `useUnifiedWallet()` directly.
 
 ## Public API
 
-Primary exports from `dogestash`:
+Primary exports from `@jonheaven/dogestash`:
 - `BrowserWallet`
 - `BrowserWalletSigner`
 - `DogestashProvider`
@@ -53,15 +89,15 @@ Primary exports from `dogestash`:
 Recommended subpath imports for maximum tree-shaking:
 
 ```ts
-import { BrowserWallet } from 'dogestash/lib/browser-wallet';
-import { BrowserWalletSigner } from 'dogestash/adapters/BrowserWalletSigner';
-import { DogestashProvider } from 'dogestash/providers/DogestashProvider';
+import { BrowserWallet } from '@jonheaven/dogestash/lib/browser-wallet';
+import { BrowserWalletSigner } from '@jonheaven/dogestash/adapters/BrowserWalletSigner';
+import { DogestashProvider } from '@jonheaven/dogestash/providers/DogestashProvider';
 ```
 
 ## Marketplace Signer Quickstart
 
 ```ts
-import { BrowserWallet, BrowserWalletSigner } from 'dogestash';
+import { BrowserWallet, BrowserWalletSigner } from '@jonheaven/dogestash';
 
 const browserWallet = new BrowserWallet();
 const created = await BrowserWallet.generateWallet('mainnet');
@@ -93,8 +129,19 @@ Use `useUnifiedWallet()` with `ConnectWalletButton` to produce kabosu-compatible
 
 ```tsx
 const { signDMPIntent } = useUnifiedWallet();
-const signedIntent = await signDMPIntent('listing', { price_koinu: 4206900000, psbt_cid: 'ipfs://Qm...', expiry_height: 5000000 });
-const signedBid = await signDMPIntent('bid', { listing_id: '<listing-inscription-id>', price_koinu: 4206900000, psbt_cid: 'ipfs://Qm...', expiry_height: 5000100 });
+
+const signedIntent = await signDMPIntent('listing', {
+  price_koinu: 4206900000,
+  psbt_cid: 'ipfs://Qm...',
+  expiry_height: 5000000,
+});
+
+const signedBid = await signDMPIntent('bid', {
+  listing_id: '<listing-inscription-id>',
+  price_koinu: 4206900000,
+  psbt_cid: 'ipfs://Qm...',
+  expiry_height: 5000100,
+});
 ```
 
 Returned payloads already use the canonical DMP wire format expected by kabosu:
@@ -105,23 +152,21 @@ Returned payloads already use the canonical DMP wire format expected by kabosu:
 
 ## Indexer / Data Provider API
 
-dogestash makes no direct calls to any third-party service. All chain data (balances, UTXOs, inscriptions, DRC-20 tokens) is fetched through a single configurable base URL pointing at your own deployed indexer.
+`@jonheaven/dogestash` makes no direct calls to any third-party service. All chain data (balances, UTXOs, inscriptions, DRC-20 tokens) is fetched through a single configurable base URL pointing at your own deployed indexer.
 
-**The workflow:**
-1. Deploy [**jonheaven/dog**](https://github.com/jonheaven/dog) or [**jonheaven/kabosu**](https://github.com/jonheaven/kabosu) to a server (e.g. `https://api.yourdomain.com`)
+The workflow:
+1. Deploy [**jonheaven/dog**](https://github.com/jonheaven/dog) or [**jonheaven/kabosu**](https://github.com/jonheaven/kabosu) to a server, for example `https://api.yourdomain.com`
 2. Set the env var in your frontend:
    ```env
    VITE_WALLET_DATA_API_BASE_URL=https://api.yourdomain.com/api
    ```
-3. dogestash will route all wallet data fetches (balance, UTXOs, inscriptions, DRC-20) through that endpoint — no third-party dependencies, fully under your control.
+3. `@jonheaven/dogestash` will route all wallet data fetches through that endpoint with no third-party dependencies.
 
 Defaults to `http://localhost:3001/api` if unset, which works out of the box when running either reference indexer locally during development.
 
 ### Required endpoints
 
 All endpoints accept `address` as a query parameter and return JSON.
-
----
 
 #### `GET /indexer/balance?address=<addr>`
 
@@ -134,16 +179,14 @@ Returns the spendable DOGE balance for an address.
 { "availableBalance": 500000000 }
 ```
 
-Balance is interpreted as **satoshis** and converted to DOGE internally (`÷ 100,000,000`).
-
----
+Balance is interpreted as satoshis and converted to DOGE internally (`/ 100,000,000`).
 
 #### `GET /indexer/utxos?address=<addr>`
 
 Returns unspent outputs needed for transaction construction.
 
 ```jsonc
-// Expected response — array of UTXOs:
+// Expected response: array of UTXOs
 [
   {
     "txid": "abc123...",
@@ -154,25 +197,21 @@ Returns unspent outputs needed for transaction construction.
 ]
 ```
 
-The exact UTXO shape is passed through to the PSBT builder as-is — match whatever your signing flow expects.
-
----
+The exact UTXO shape is passed through to the PSBT builder as-is. Match whatever your signing flow expects.
 
 #### `GET /indexer/inscriptions?address=<addr>`
 
-Returns Doginal (ordinal) inscriptions held by an address.
+Returns Doginal inscriptions held by an address.
 
 ```jsonc
 // Expected response (any of these shapes works):
-{ "list": [ { "inscriptionId": "...", "contentType": "image/png", ... } ] }
+{ "list": [ { "inscriptionId": "...", "contentType": "image/png" } ] }
 { "items": [ ... ] }
-{ "data":  [ ... ] }
-[ ... ]   // bare array also accepted
+{ "data": [ ... ] }
+[ ... ]
 ```
 
-Each item should include at minimum: `inscriptionId`, `contentType`, `genesisTransaction`, `inscriptionNumber`.
-
----
+Each item should include at minimum `inscriptionId`, `contentType`, `genesisTransaction`, and `inscriptionNumber`.
 
 #### `GET /indexer/drc20?address=<addr>`
 
@@ -193,15 +232,13 @@ Returns DRC-20 token balances for an address.
 // Also accepted: { "tokens": [...] } or a bare array
 ```
 
-Fields are normalised internally — `balance`, `available`, `transferable` shorthand keys are also recognised.
-
----
+Fields are normalized internally. `balance`, `available`, and `transferable` shorthand keys are also recognized.
 
 ### Optional endpoints
 
 | Endpoint | Used by |
 |---|---|
-| `GET /health` | `StatusIndicator` component — shows green/red connection state |
+| `GET /health` | `StatusIndicator` component for green/red connection state |
 | `GET /claims/active?address=<addr>` | `ClaimModal` component |
 | `POST /launches/:id/claim` | Dogedrops claim flow |
 
@@ -217,6 +254,6 @@ Either implements all required and optional endpoints and is designed to be depl
 | Provider | Notes |
 |---|---|
 | [QuickNode Dogecoin](https://www.quicknode.com/) | Proxy `/indexer/*` to their RPC methods |
-| [Dogechain.info API](https://dogechain.info/api/v1/) | Thin adapter — field names differ slightly |
+| [Dogechain.info API](https://dogechain.info/api/v1/) | Thin adapter. Field names differ slightly |
 | Self-hosted [ord](https://github.com/ordinals/ord) | Inscriptions endpoint maps directly |
-| Custom backend | Implement the four endpoints, return any of the accepted shapes |
+| Custom backend | Implement the four endpoints and return any of the accepted shapes |

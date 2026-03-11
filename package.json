@@ -1,5 +1,5 @@
 {
-  "name": "dogestash",
+  "name": "@jonheaven/dogestash",
   "version": "1.0.0",
   "private": false,
   "description": "Dogecoin wallet toolkit with browser wallet core, adapters, and React integrations.",
