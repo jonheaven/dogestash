@@ -1,7 +1,7 @@
 import { WalletConfig } from '../wallets/types';
 import { MyDogeAdapter } from '../wallets/MyDogeAdapter';
-import { MetaMaskAdapter } from '../wallets/MetaMaskAdapter';
 import { DojakAdapter } from '../wallets/DojakAdapter';
+import { NintondoAdapter } from '../wallets/NintondoAdapter';
 
 /**
  * Wallet configuration - easily enable/disable wallet types
@@ -23,11 +23,11 @@ export const WALLET_CONFIGS: WalletConfig[] = [
     priority: 9, // Below MyDoge
   },
   {
-    id: 'metamask',
-    name: 'MetaMask (Doge)',
-    adapter: MetaMaskAdapter,
-    enabled: false, // Disabled until Doge compatibility is implemented
-    priority: 5,
+    id: 'nintondo',
+    name: 'Nintondo',
+    adapter: NintondoAdapter,
+    enabled: true,
+    priority: 8,
   },
   // Future wallets can be added here:
   // {

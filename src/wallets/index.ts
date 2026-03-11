@@ -3,7 +3,8 @@
 export * from './types';
 export * from './WalletManager';
 export * from './MyDogeAdapter';
-export * from './MetaMaskAdapter';
+export * from './DojakAdapter';
+export * from './NintondoAdapter';
 
 // Re-export the singleton instance for convenience
 export { walletManager } from './WalletManager';

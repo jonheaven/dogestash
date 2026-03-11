@@ -1,6 +1,7 @@
 import { WalletAdapter, WalletConfig } from './types';
 import { MyDogeAdapter } from './MyDogeAdapter';
 import { DojakAdapter } from './DojakAdapter';
+import { NintondoAdapter } from './NintondoAdapter';
 
 export class WalletManager {
   private adapters: Map<string, WalletAdapter> = new Map();
@@ -23,6 +24,14 @@ export class WalletManager {
       enabled: true,
       priority: 9
     });
+
+    this.registerWallet({
+      id: 'nintondo',
+      name: 'Nintondo',
+      adapter: NintondoAdapter,
+      enabled: true,
+      priority: 8
+    });
   }
 
   /**
@@ -33,6 +42,7 @@ export class WalletManager {
 
     const adapter = new config.adapter();
     this.adapters.set(config.id, adapter);
+    this.configs = this.configs.filter((existing) => existing.id !== config.id);
     this.configs.push(config);
 
     // Sort by priority (highest first)

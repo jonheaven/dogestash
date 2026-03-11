@@ -4,7 +4,7 @@ Dogecoin local browser wallet implementation + browser extension support for DOG
 
 Provides a self-contained wallet toolkit for building on Dogecoin:
 - Local browser wallet core (`BrowserWallet`)
-- Wallet adapters and manager (`src/wallets`) — MyDoge, Nintondo, Dojak, MetaMask
+- Wallet adapters and unified wallet flows for DOGE L1 wallets — MyDoge, Nintondo, Dojak
 - React contexts for wallet state (`src/contexts`)
 - Wallet connect/modal UI components (`src/components`)
 
