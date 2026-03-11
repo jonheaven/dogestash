@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Satoshi Font - Web3 Typography */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Variable.woff2') format('woff2-variations'),
+       url('/fonts/Satoshi-Variable.woff2') format('woff2');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-VariableItalic.woff2') format('woff2-variations'),
+       url('/fonts/Satoshi-VariableItalic.woff2') format('woff2');
+  font-weight: 300 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Specific weight fallbacks for better browser support */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Custom CSS overrides - minimal and optimized */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary;
+    font-family: 'Satoshi', sans-serif;
+  }
+
+  /* Force ALL text to use Satoshi font - no exceptions */
+  * {
+    font-family: 'Satoshi', sans-serif !important;
+  }
+
+  /* Specific font-family overrides for monospace text */
+  code, kbd, samp, pre, .font-mono, .font-monospace {
+    font-family: 'Satoshi', monospace !important;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-bg-primary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-primary rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-600;
+  }
+}
+
+@layer components {
+  /* Button styles */
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-4 py-2 rounded-md transition-colors duration-200 border border-primary-600 hover:border-primary-700;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent hover:bg-gray-800 text-text-primary font-medium px-4 py-2 rounded-md transition-colors duration-200 border border-border-primary hover:border-gray-600;
+  }
+
+  .btn-outline {
+    @apply bg-transparent hover:bg-primary-600 text-primary-400 hover:text-white font-medium px-4 py-2 rounded-md transition-all duration-200 border border-primary-400 hover:border-primary-600;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-bg-secondary rounded-lg border border-border-primary p-6 transition-all duration-200 hover:border-primary-600/50;
+  }
+
+  .card-hover {
+    @apply hover:shadow-glow hover:scale-[1.02] transition-all duration-200;
+  }
+
+  /* Input styles */
+  .input {
+    @apply bg-bg-tertiary border border-border-primary rounded-md px-3 py-2 text-text-primary placeholder-text-tertiary focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors duration-200;
+  }
+
+  /* Sidebar hover animation */
+  .sidebar-collapsed {
+    @apply w-18;
+  }
+
+  .sidebar-expanded {
+    @apply w-60;
+  }
+
+  .sidebar-overlay {
+    @apply fixed left-0 top-16 bottom-10 z-10 bg-bg-primary border-r border-border-primary shadow-xl transition-transform duration-200 ease-out;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply w-full bg-gray-700 rounded-full h-2;
+  }
+
+  .progress-fill {
+    @apply bg-primary-500 h-2 rounded-full transition-all duration-300 ease-out;
+  }
+
+  /* Status indicators */
+  .status-live {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/20 text-green-400 border border-green-700/30;
+  }
+
+  .status-upcoming {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-900/20 text-yellow-400 border border-yellow-700/30;
+  }
+
+  .status-ended {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-900/20 text-gray-400 border border-gray-700/30;
+  }
+
+  /* Grid layouts */
+  .grid-launch-cards {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    .grid-launch-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .grid-launch-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-launch-cards {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .grid-launch-cards {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Focus utilities */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-bg-primary;
+  }
+}

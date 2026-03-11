@@ -1,0 +1,9 @@
+// Wallet system exports for extensible wallet support
+
+export * from './types';
+export * from './WalletManager';
+export * from './MyDogeAdapter';
+export * from './MetaMaskAdapter';
+
+// Re-export the singleton instance for convenience
+export { walletManager } from './WalletManager';
