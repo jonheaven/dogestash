@@ -87,6 +87,22 @@ Notes:
 - `signIntent` validates `expiresAt`, `network`, and `address` before signing.
 - Storage namespace is `dogestash_wallet_*`; legacy `dogemarket_browser_wallet_*` keys auto-migrate on first use.
 
+## DoginalMarket Protocol (DMP)
+
+Use `useUnifiedWallet()` with `ConnectWalletButton` to produce kabosu-compatible DMP payloads in one call.
+
+```tsx
+const { signDMPIntent } = useUnifiedWallet();
+const signedIntent = await signDMPIntent('listing', { price_koinu: 4206900000, psbt_cid: 'ipfs://Qm...', expiry_height: 5000000 });
+const signedBid = await signDMPIntent('bid', { listing_id: '<listing-inscription-id>', price_koinu: 4206900000, psbt_cid: 'ipfs://Qm...', expiry_height: 5000100 });
+```
+
+Returned payloads already use the canonical DMP wire format expected by kabosu:
+- `protocol: "DMP"`
+- `version: "1.0"`
+- `op: "listing" | "bid" | "settle" | "cancel"`
+- `seller`, `nonce`, and hex `signature` are filled automatically from the connected wallet
+
 ## Indexer / Data Provider API
 
 dogestash makes no direct calls to any third-party service. All chain data (balances, UTXOs, inscriptions, DRC-20 tokens) is fetched through a single configurable base URL pointing at your own deployed indexer.

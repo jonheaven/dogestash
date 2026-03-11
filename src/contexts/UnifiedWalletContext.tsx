@@ -4,7 +4,15 @@ import { createContext, useContext, useState, useCallback, useEffect, useRef } f
 import { useMyDogeWallet } from './MyDogeWalletContext';
 import { useNintondoWallet } from './NintondoWalletContext';
 import { useBrowserWallet } from './BrowserWalletContext';
-import { WalletType } from '../types/wallet';
+import { BrowserWallet } from '../lib/browser-wallet';
+import { signDMPIntent as signDMPIntentService } from '../services/dmp';
+import type {
+  DmpIntentParams,
+  DmpIntentSigner,
+  DmpIntentType,
+  SignedDmpIntent,
+  WalletType,
+} from '../types/wallet';
 
 // Dojak wallet state (managed locally since it doesn't have its own context)
 interface DojakState {
@@ -27,6 +35,7 @@ interface UnifiedWalletContextValue {
   signMessage: (message: string) => Promise<string>;
   signPSBT: (psbtHex: string) => Promise<string>;
   signPSBTOnly: (psbtHex: string) => Promise<string>;
+  signDMPIntent: DmpIntentSigner;
   sendInscription: (recipientAddress: string, location: string) => Promise<string>;
   getTransactionStatus: (txId: string) => Promise<{ status: string; confirmations: number }>;
   // Browser wallet specific
@@ -451,6 +460,56 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
     }
   }, [walletType, myDoge, nintondo]);
 
+  const signDMPIntent = useCallback(
+    async <T extends DmpIntentType>(
+      intentType: T,
+      params: DmpIntentParams<T>
+    ): Promise<SignedDmpIntent<T>> => {
+      if (!address) {
+        throw new Error('Connect a wallet before signing DMP intents');
+      }
+
+      if (walletType === 'browser') {
+        const browserWallet = new BrowserWallet();
+        return signDMPIntentService(intentType, {
+          ...params,
+          activeAddress: address,
+          signMessage: (message) => browserWallet.signMessage(message, undefined, address),
+        });
+      }
+
+      if (walletType === 'mydoge') {
+        return signDMPIntentService(intentType, {
+          ...params,
+          activeAddress: address,
+          signMessage: (message) => myDoge.signMessage(message),
+        });
+      }
+
+      if (walletType === 'nintondo') {
+        return signDMPIntentService(intentType, {
+          ...params,
+          activeAddress: address,
+          signMessage: (message) => nintondo.signMessage(message),
+        });
+      }
+
+      if (walletType === 'dojak') {
+        if (!window.dojak) {
+          throw new Error('Dojak wallet not available');
+        }
+        return signDMPIntentService(intentType, {
+          ...params,
+          activeAddress: address,
+          signMessage: (message) => (window.dojak as any).signMessage(message, 'ecdsa'),
+        });
+      }
+
+      throw new Error('DMP signing is not supported for the current wallet');
+    },
+    [address, walletType, myDoge, nintondo]
+  );
+
   const sendInscription = useCallback(async (recipientAddress: string, location: string): Promise<string> => {
     try {
       if (walletType === 'mydoge') {
@@ -493,6 +552,7 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
     signMessage,
     signPSBT,
     signPSBTOnly,
+    signDMPIntent,
     sendInscription,
     getTransactionStatus,
     createBrowserWallet: async () => {

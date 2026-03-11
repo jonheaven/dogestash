@@ -9,6 +9,7 @@ const unifiedWalletMockState = vi.hoisted(() => ({
   address: null as string | null,
   connecting: false,
   disconnect: vi.fn().mockResolvedValue(undefined),
+  signDMPIntent: vi.fn(),
 }));
 
 vi.mock('../contexts/UnifiedWalletContext', async (importOriginal) => {
@@ -27,6 +28,7 @@ vi.mock('../contexts/UnifiedWalletContext', async (importOriginal) => {
       signMessage: vi.fn(),
       signPSBT: vi.fn(),
       signPSBTOnly: vi.fn(),
+      signDMPIntent: unifiedWalletMockState.signDMPIntent,
       sendInscription: vi.fn(),
       getTransactionStatus: vi.fn(),
       createBrowserWallet: vi.fn(),
@@ -68,6 +70,7 @@ describe('ConnectWalletButton', () => {
     unifiedWalletMockState.address = null;
     unifiedWalletMockState.connecting = false;
     unifiedWalletMockState.disconnect.mockClear();
+    unifiedWalletMockState.signDMPIntent.mockClear();
   });
 
   it('renders connect label when disconnected', () => {
@@ -95,5 +98,18 @@ describe('ConnectWalletButton', () => {
     render(<ConnectWalletButton />);
     const btn = screen.getByRole('button', { name: /connecting\.\.\./i });
     expect(btn).toBeDisabled();
+  });
+
+  it('exposes signDMPIntent through onWalletReady', () => {
+    unifiedWalletMockState.connected = true;
+    unifiedWalletMockState.address = 'DRY5W9KFzR3asTvdaTG4LTqaRKqhHT1DFR';
+    const onWalletReady = vi.fn();
+
+    render(<ConnectWalletButton onWalletReady={onWalletReady} />);
+
+    expect(onWalletReady).toHaveBeenCalledWith({
+      address: 'DRY5W9KFzR3asTvdaTG4LTqaRKqhHT1DFR',
+      signDMPIntent: unifiedWalletMockState.signDMPIntent,
+    });
   });
 });

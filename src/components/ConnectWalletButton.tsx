@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useUnifiedWallet } from '../contexts/UnifiedWalletContext';
+import type { DmpIntentSigner } from '../types/wallet';
 import WalletSelectionModal from './WalletSelectionModal';
 
-interface ConnectWalletButtonProps {
+export interface ConnectWalletButtonProps {
   className?: string;
   connectLabel?: string;
   disconnectLabel?: string;
   showAddressWhenConnected?: boolean;
+  onWalletReady?: (wallet: { address: string; signDMPIntent: DmpIntentSigner }) => void;
 }
 
 function shortAddress(address: string): string {
@@ -21,9 +23,16 @@ export function ConnectWalletButton({
   connectLabel = 'Connect Wallet',
   disconnectLabel = 'Disconnect',
   showAddressWhenConnected = true,
+  onWalletReady,
 }: ConnectWalletButtonProps) {
-  const { connected, address, disconnect, connecting } = useUnifiedWallet();
+  const { connected, address, disconnect, connecting, signDMPIntent } = useUnifiedWallet();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (connected && address && onWalletReady) {
+      onWalletReady({ address, signDMPIntent });
+    }
+  }, [connected, address, onWalletReady, signDMPIntent]);
 
   const label = useMemo(() => {
     if (!connected) return connectLabel;

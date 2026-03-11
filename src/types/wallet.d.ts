@@ -96,6 +96,94 @@ export interface SignedIntent {
   payloadHash: string;
 }
 
+export type DmpIntentType = 'listing' | 'bid' | 'settle' | 'cancel';
+
+export interface DmpIntentCommonParams {
+  address?: string;
+  nonce?: number;
+}
+
+export interface DmpListingIntentParams extends DmpIntentCommonParams {
+  price_koinu: number;
+  psbt_cid: string;
+  expiry_height: number;
+}
+
+export interface DmpBidIntentParams extends DmpIntentCommonParams {
+  listing_id: string;
+  price_koinu: number;
+  psbt_cid: string;
+  expiry_height: number;
+}
+
+export interface DmpSettleIntentParams extends DmpIntentCommonParams {
+  listing_id: string;
+  psbt_cid: string;
+  bid_id?: string;
+}
+
+export interface DmpCancelIntentParams extends DmpIntentCommonParams {
+  listing_id: string;
+}
+
+export interface DmpIntentParamsMap {
+  listing: DmpListingIntentParams;
+  bid: DmpBidIntentParams;
+  settle: DmpSettleIntentParams;
+  cancel: DmpCancelIntentParams;
+}
+
+export type DmpIntentParams<T extends DmpIntentType = DmpIntentType> = DmpIntentParamsMap[T];
+
+export interface SignedDmpIntentBase {
+  protocol: 'DMP';
+  version: '1.0';
+  seller: string;
+  nonce: number;
+  signature: string;
+}
+
+export interface SignedDmpListingIntent extends SignedDmpIntentBase {
+  op: 'listing';
+  price_koinu: number;
+  psbt_cid: string;
+  expiry_height: number;
+}
+
+export interface SignedDmpBidIntent extends SignedDmpIntentBase {
+  op: 'bid';
+  listing_id: string;
+  price_koinu: number;
+  psbt_cid: string;
+  expiry_height: number;
+}
+
+export interface SignedDmpSettleIntent extends SignedDmpIntentBase {
+  op: 'settle';
+  listing_id: string;
+  psbt_cid: string;
+  bid_id?: string;
+}
+
+export interface SignedDmpCancelIntent extends SignedDmpIntentBase {
+  op: 'cancel';
+  listing_id: string;
+}
+
+export interface SignedDmpIntentMap {
+  listing: SignedDmpListingIntent;
+  bid: SignedDmpBidIntent;
+  settle: SignedDmpSettleIntent;
+  cancel: SignedDmpCancelIntent;
+}
+
+export type SignedDmpIntent<T extends DmpIntentType = DmpIntentType> = SignedDmpIntentMap[T];
+
+export type DmpIntentSigner = <T extends DmpIntentType>(
+  intentType: T,
+  params: DmpIntentParams<T>
+) => Promise<SignedDmpIntent<T>>;
+
 export interface MarketplaceSigner {
   mode: WalletMode;
   connect(): Promise<{ address: string }>;
@@ -119,6 +207,7 @@ export interface UnifiedWalletContextValue {
   signMessage: (message: string) => Promise<string>;
   signPSBT: (psbtHex: string) => Promise<string>;
   signPSBTOnly: (psbtHex: string) => Promise<string>;
+  signDMPIntent: DmpIntentSigner;
   sendInscription: (recipientAddress: string, location: string) => Promise<string>;
   getTransactionStatus: (txId: string) => Promise<{ status: string; confirmations: number }>;
   // Browser wallet specific
