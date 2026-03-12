@@ -15,7 +15,7 @@ import {
   decodePrivateKeyFromWIF,
 } from 'doge-sdk';
 import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39';
-import { wordlist as englishWordlist } from '@scure/bip39/wordlists/english';
+import { wordlist as englishWordlist } from '@scure/bip39/wordlists/english.js';
 import { HDKey } from '@scure/bip32';
 
 import { decryptJSON, encryptJSON } from './secureStorage';
