@@ -7,6 +7,20 @@ import type {
 export const DMP_PROTOCOL = 'DMP';
 export const DMP_VERSION = '1.0';
 
+const ALLOWED_SIGNING_HOSTNAMES = new Set([
+  'localhost',
+  '127.0.0.1',
+  '0.0.0.0',
+  '::1',
+  '[::1]',
+  'dogeco.sh',
+  'www.dogeco.sh',
+  'jonheaven.com',
+  'www.jonheaven.com',
+]);
+const ALLOWED_SIGNING_HOSTNAME_SUFFIXES = ['.dogeco.sh', '.jonheaven.com'];
+const warnedUnexpectedSigningHostnames = new Set<string>();
+
 type SignMessageFn = (message: string) => Promise<string>;
 
 type DmpSigningParams<T extends DmpIntentType> = DmpIntentParams<T> & {
@@ -131,6 +145,33 @@ function normalizeSignatureToHex(signature: string): string {
   return bytesToHex(new TextEncoder().encode(normalized));
 }
 
+function isAllowedSigningHostname(hostname: string): boolean {
+  return (
+    ALLOWED_SIGNING_HOSTNAMES.has(hostname) ||
+    ALLOWED_SIGNING_HOSTNAME_SUFFIXES.some((suffix) => hostname.endsWith(suffix))
+  );
+}
+
+export function warnIfUnexpectedSigningHostname(signingFlow: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+  if (!hostname || isAllowedSigningHostname(hostname)) {
+    return;
+  }
+
+  if (warnedUnexpectedSigningHostnames.has(hostname)) {
+    return;
+  }
+
+  warnedUnexpectedSigningHostnames.add(hostname);
+  console.warn(
+    `[DOGESTASH] ${signingFlow} requested from unexpected hostname "${hostname}". Verify the site origin before approving wallet signatures.`
+  );
+}
+
 function buildUnsignedIntent<T extends DmpIntentType>(
   intentType: T,
   params: DmpSigningParams<T>
@@ -201,6 +242,7 @@ export async function signDMPIntent<T extends DmpIntentType>(
 ): Promise<SignedDmpIntent<T>> {
   const unsignedIntent = buildUnsignedIntent(intentType, params);
   const canonicalJson = JSON.stringify(canonicalize(unsignedIntent));
+  warnIfUnexpectedSigningHostname('DMP signing');
   const rawSignature = await params.signMessage(canonicalJson);
   return {
     ...unsignedIntent,

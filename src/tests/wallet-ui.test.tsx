@@ -142,12 +142,13 @@ describe('wallet UI hardening', () => {
     const onClose = vi.fn();
     render(<WalletSelectionModal isOpen onClose={onClose} />);
 
-    const ledgerButton = (await screen.findByText('Ledger Hardware Wallet')).closest('button');
+    const ledgerButton = (await screen.findByText('Connect Ledger (Recommended)')).closest(
+      'button'
+    );
     const browserButton = screen.getByText('Local Wallet').closest('button');
 
     expect(ledgerButton).not.toBeNull();
     expect(browserButton).not.toBeNull();
-    expect(screen.getByText(/^Recommended$/i)).toBeInTheDocument();
     expect(
       ledgerButton!.compareDocumentPosition(browserButton!) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();

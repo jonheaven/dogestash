@@ -1,5 +1,9 @@
 const CURRENT_SECURE_STORAGE_VERSION = 2;
+// New envelopes use a stronger PBKDF2 work factor to slow offline password guessing while
+// remaining responsive in modern browsers during normal wallet unlock flows.
 const CURRENT_PBKDF2_ITERATIONS = 310_000;
+// Legacy payloads were derived with 100,000 PBKDF2 rounds. We preserve that exact count so
+// existing wallets can still be decrypted and migrated without any data loss on first unlock.
 const LEGACY_PBKDF2_ITERATIONS = 100_000;
 const SALT_LENGTH = 16;
 const IV_LENGTH = 12;
@@ -96,7 +100,10 @@ async function deriveAesKey(
 
 async function encryptBytes(bytes: Uint8Array, password: string): Promise<SecureStorageEnvelope> {
   const subtle = requireSubtleCrypto();
+  // `crypto.getRandomValues` uses the browser's CSPRNG so each wallet gets a unique salt.
+  // That prevents identical passwords from deriving identical AES keys across stored wallets.
   const salt = globalThis.crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
+  // AES-GCM also requires a fresh IV per encryption so nonce reuse cannot undermine integrity.
   const iv = globalThis.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
   const key = await deriveAesKey(password, salt, CURRENT_PBKDF2_ITERATIONS, ['encrypt']);
   const ciphertext = await subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes);

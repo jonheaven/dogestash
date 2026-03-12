@@ -160,6 +160,17 @@ Returned payloads already use the canonical DMP wire format expected by kabosu:
 - `op: "listing" | "bid" | "settle" | "cancel"`
 - `seller`, `nonce`, and hex `signature` are filled automatically from the connected wallet
 
+## DMP Marketplace Demo (Quickstart)
+
+A minimal end-to-end example lives in [`src/examples/DMPDemo.tsx`](src/examples/DMPDemo.tsx).
+
+It shows how to:
+- connect a wallet with `dogestash`
+- enter `price_koinu` and `expiry_height`
+- sign a sample `listing` intent with `signDMPIntent('listing', ...)`
+- sign a sample `bid` intent with `signDMPIntent('bid', ...)`
+- inspect the returned signed DMP JSON in the UI
+
 ## Indexer / Data Provider API
 
 `@jonheaven/dogestash` makes no direct calls to any third-party service. All chain data (balances, UTXOs, inscriptions, DRC-20 tokens) is fetched through a single configurable base URL pointing at your own deployed indexer.

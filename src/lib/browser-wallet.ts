@@ -19,6 +19,7 @@ import { wordlist as englishWordlist } from '@scure/bip39/wordlists/english.js';
 import { HDKey } from '@scure/bip32';
 
 import { decryptJSON, encryptJSON } from './secureStorage';
+import { warnIfUnexpectedSigningHostname } from '../services/dmp';
 import type {
   WalletData,
   NetworkType,
@@ -1071,6 +1072,8 @@ export class BrowserWallet {
     if (!message) {
       throw new Error('Message is required');
     }
+
+    warnIfUnexpectedSigningHostname('Message signing');
 
     const wallet = await this.loadWallet(password, address);
     if (!wallet) {

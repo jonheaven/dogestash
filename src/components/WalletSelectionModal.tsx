@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Monitor, ShieldCheck } from 'lucide-react';
+import { LoaderCircle, Monitor, ShieldCheck } from 'lucide-react';
 import { useUnifiedWallet } from '../contexts/UnifiedWalletContext';
 import { useMyDogeWallet } from '../contexts/MyDogeWalletContext';
 import { useNintondoWallet } from '../contexts/NintondoWalletContext';
@@ -23,7 +23,9 @@ export default function WalletSelectionModal({ isOpen, onClose }: WalletSelectio
   const [showBrowserWallet, setShowBrowserWallet] = useState(false);
   const [hasBrowserWallet, setHasBrowserWallet] = useState(false);
   const [ledgerSupported, setLedgerSupported] = useState(false);
-  const [connecting, setConnecting] = useState(false);
+  const [connectingType, setConnectingType] = useState<
+    'mydoge' | 'nintondo' | 'browser' | 'dojak' | 'ledger' | null
+  >(null);
 
   const myDoge = myDogeContext?.myDoge || null;
   const nintondo = nintondoContext?.nintondo || null;
@@ -46,7 +48,7 @@ export default function WalletSelectionModal({ isOpen, onClose }: WalletSelectio
 
   const handleConnect = async (type: 'mydoge' | 'nintondo' | 'browser' | 'dojak' | 'ledger') => {
     try {
-      setConnecting(true);
+      setConnectingType(type);
       if (type === 'browser') {
         setShowBrowserWallet(true);
         return;
@@ -56,7 +58,7 @@ export default function WalletSelectionModal({ isOpen, onClose }: WalletSelectio
     } catch (error) {
       console.error('Connection error:', error);
     } finally {
-      setConnecting(false);
+      setConnectingType(null);
     }
   };
 
@@ -66,6 +68,9 @@ export default function WalletSelectionModal({ isOpen, onClose }: WalletSelectio
       onClose();
     }
   };
+
+  const connecting = connectingType !== null;
+  const ledgerConnecting = connectingType === 'ledger';
 
   return (
     <>
@@ -96,24 +101,32 @@ export default function WalletSelectionModal({ isOpen, onClose }: WalletSelectio
               <button
                 onClick={() => handleConnect('ledger')}
                 disabled={!ledgerSupported || connecting}
-                className="w-full p-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-between"
+                className="w-full rounded-xl border border-emerald-400/30 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 px-4 py-4 shadow-lg shadow-emerald-950/30 transition-all hover:from-emerald-500 hover:via-emerald-400 hover:to-teal-400 disabled:cursor-not-allowed disabled:border-gray-700 disabled:from-gray-800 disabled:via-gray-800 disabled:to-gray-800 disabled:shadow-none flex items-center justify-between"
               >
                 <div className="flex items-center space-x-3">
-                  <ShieldCheck className="w-6 h-6" />
+                  <div className="rounded-full bg-white/10 p-2 ring-1 ring-white/15">
+                    <ShieldCheck className="w-6 h-6 text-white" />
+                  </div>
                   <div className="text-left">
-                    <div className="text-white sansation-bold flex items-center gap-2">
-                      Ledger Hardware Wallet
-                      <span className="text-[10px] uppercase tracking-[0.18em] bg-emerald-200 text-emerald-900 px-2 py-1 rounded-full">
-                        Recommended
-                      </span>
+                    <div className="text-white sansation-bold">
+                      Connect Ledger (Recommended)
                     </div>
-                    <div className="text-sm text-emerald-100 sansation-regular">
-                      USB hardware signing with isolated keys
+                    <div className="text-sm text-emerald-50/90 sansation-regular">
+                      Hardware signing over WebUSB with keys kept off-device
                     </div>
                   </div>
                 </div>
-                <span className="text-xs text-emerald-100">
-                  {ledgerSupported ? 'Connect USB' : 'WebUSB'}
+                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-50">
+                  {ledgerConnecting ? (
+                    <span className="inline-flex items-center gap-2">
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      Connecting
+                    </span>
+                  ) : ledgerSupported ? (
+                    'WebUSB Ready'
+                  ) : (
+                    'WebUSB Required'
+                  )}
                 </span>
               </button>
 

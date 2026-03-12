@@ -6,7 +6,10 @@ import { useNintondoWallet } from './NintondoWalletContext';
 import { useBrowserWallet } from './BrowserWalletContext';
 import { BrowserWallet } from '../lib/browser-wallet';
 import { LedgerWallet } from '../lib/ledger-wallet';
-import { signDMPIntent as signDMPIntentService } from '../services/dmp';
+import {
+  signDMPIntent as signDMPIntentService,
+  warnIfUnexpectedSigningHostname,
+} from '../services/dmp';
 import { walletDataApi } from '../utils/api';
 import type {
   DmpIntentParams,
@@ -460,6 +463,8 @@ export function UnifiedWalletProvider({ children }: { children: React.ReactNode 
       if (!isInitialized) {
         throw new Error('Wallet system not initialized');
       }
+
+      warnIfUnexpectedSigningHostname('Message signing');
 
       if (walletType === 'mydoge') {
         return myDoge.signMessage(message);
