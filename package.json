@@ -71,7 +71,7 @@
     "cors": "^2.8.5",
     "doge-sdk": "^0.5.0-beta.5",
     "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
+    "express-rate-limit": "^8.3.1",
     "lucide-react": "^0.344.0",
     "qrcode": "^1.5.4",
     "qrcode.react": "^3.1.0",
