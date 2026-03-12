@@ -60,15 +60,28 @@ declare global {
   }
 }
 
-export type WalletType = 'browser' | 'mydoge' | 'nintondo' | 'dojak';
+export type WalletType = 'browser' | 'mydoge' | 'nintondo' | 'dojak' | 'ledger';
 export type WalletMode = 'dojak' | 'local_browser_wallet';
 export type NetworkType = 'mainnet' | 'testnet' | 'regtest';
+export type WalletSource = 'generated' | 'mnemonic' | 'privateKey' | 'ledger';
+
+export interface SeedMaterial {
+  mnemonic: string;
+  passphrase?: string;
+}
+
 export interface WalletData {
   address: string;
   privateKey: string;
   network: NetworkType;
   nickname?: string;
   createdAt?: number;
+  accountIndex?: number;
+  derivationPath?: string;
+  seedFingerprint?: string;
+  mnemonicWordCount?: number;
+  walletSource?: WalletSource;
+  publicKey?: string;
 }
 
 export type MarketplaceIntentType =
@@ -201,7 +214,10 @@ export interface UnifiedWalletContextValue {
   balance: number;
   balanceVerified: boolean; // Track if balance has been verified from API
   connecting: boolean;
+  accountIndex: number | null;
+  derivationPath: string | null;
   connect: (type: WalletType) => Promise<void>;
+  switchAccount: (accountIndex: number, password?: string) => Promise<void>;
   disconnect: () => Promise<void>;
   sendTransaction: (recipientAddress: string, amount: number) => Promise<string>;
   signMessage: (message: string) => Promise<string>;
@@ -214,14 +230,11 @@ export interface UnifiedWalletContextValue {
   createBrowserWallet: () => Promise<WalletData>;
   importBrowserWallet: (privateKey: string) => Promise<WalletData>;
   importBrowserWalletFromMnemonic: (mnemonic: string, passphrase?: string) => Promise<WalletData>;
-  saveBrowserWallet: (wallet: WalletData, password?: string) => Promise<void>;
+  saveBrowserWallet: (wallet: WalletData, password?: string, options?: { seedMaterial?: SeedMaterial | null }) => Promise<void>;
   loadBrowserWallet: (password?: string) => Promise<WalletData | null>;
+  loadBrowserSeedMaterial: (password?: string) => Promise<SeedMaterial | null>;
   hasBrowserWallet: () => Promise<boolean>;
   removeBrowserWallet: () => Promise<void>;
 }
 
 export {};
-
-// Module declarations for packages without types
-declare module 'hdkey';
-declare module 'bitcore-lib-doge';

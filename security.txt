@@ -1,0 +1,5 @@
+Contact: https://github.com/jonheaven/dogestash/security/advisories/new
+Policy: https://github.com/jonheaven/dogestash/security
+Preferred-Languages: en
+Canonical: https://github.com/jonheaven/dogestash/security.txt
+Expires: 2027-03-12T00:00:00.000Z

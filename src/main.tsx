@@ -125,7 +125,7 @@ const WalletManager: React.FC = () => {
   );
 };
 
-// Service worker registration is now handled by vite-plugin-pwa
+// Service worker registration is handled by the host app when enabled.
 
 // Handle hot module replacement by reusing existing root
 let root: ReturnType<typeof createRoot> | null = null;

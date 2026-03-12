@@ -10,9 +10,19 @@ Provides a self-contained wallet toolkit for building on Dogecoin:
 
 ## What is included
 - Dogecoin browser wallet generation, import, and storage
-- Password-based encryption for locally stored wallets
+- Web Crypto encrypted local wallet storage with automatic legacy migration
+- Ledger hardware wallet support for mainnet Dogecoin accounts
+- Secure seed backup/export with QR support for encrypted mnemonic wallets
+- HD multi-account switching on Dogecoin BIP-44 accounts
 - Unified wallet context patterns for browser and extension wallets
 - Connect modal and wallet management modal UI
+
+## Security & Best Practices
+- Industry-standard Web Crypto API encryption (PBKDF2 + AES-GCM) protects password-backed browser wallets. Existing encrypted wallets are automatically decrypted with the legacy format and re-encrypted with the current Web Crypto envelope on first successful unlock.
+- Ledger hardware wallet is supported and presented as the recommended primary wallet path for long-term storage and signing isolation.
+- All wallet data is fetched from your own kabosu-compatible indexer. No third-party RPCs are required by `@jonheaven/dogestash`.
+- Browser wallet recovery phrases can be exported with explicit warnings, QR backup, and HD account recovery metadata. If a BIP-39 passphrase is used, include it with the mnemonic backup.
+- Keep browser-wallet passwords unique, back up seed material offline before funding, and prefer a Ledger for treasury or high-value wallets.
 
 ## Install
 
